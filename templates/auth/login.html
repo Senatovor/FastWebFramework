@@ -1,0 +1,36 @@
+<!-- login.html -->
+{% extends "auth/layouts.html" %}
+
+{% block title %}Вход в систему{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body p-5">
+        <h2 class="card-title text-center mb-4">Вход в систему</h2>
+
+        <form id="loginForm" novalidate>
+            <div class="mb-3">
+                <label for="username" class="form-label">Почта пользователя</label>
+                <input type="email" class="form-control" id="username" name="username" required>
+                <div class="invalid-feedback" id="usernameError"></div>
+            </div>
+
+            <div class="mb-4">
+                <label for="password" class="form-label">Пароль</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+                <div class="invalid-feedback" id="passwordError"></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 py-2">Войти</button>
+        </form>
+
+        <div class="text-center mt-4">
+            <p class="text-muted">Нет аккаунта? <a href="/register" class="text-decoration-none">Зарегистрируйтесь</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script src="/static/js/login.js"></script>
+{% endblock %}

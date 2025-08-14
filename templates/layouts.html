@@ -40,6 +40,11 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>
+                                <!-- Скрытая форма с CSRF-токеном (не отправляется, нужна только для токена) -->
+                                <form id="csrfForm" style="display: none;">
+                                    <input type="hidden" name="csrftoken" value="{{ request.scope.csrftoken() }}">
+                                </form>
+                                <!-- Кнопка выхода -->
                                 <a class="dropdown-item logout-link" href="#">
                                     <i class="bi bi-box-arrow-right"></i> Выйти
                                 </a>

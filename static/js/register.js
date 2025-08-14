@@ -1,10 +1,11 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const registerForm = document.getElementById('registerForm');
 
     registerForm.addEventListener('submit', handleRegisterSubmit);
 
     async function handleRegisterSubmit(e) {
         e.preventDefault();
+        const form = e.target;
 
         const formData = {
             username: document.getElementById('username').value,
@@ -12,14 +13,19 @@ document.addEventListener('DOMContentLoaded', function() {
             password: document.getElementById('password').value,
             is_active: true,
             is_superuser: false,
-            is_verified: false
+            is_verified: false,
+            csrftoken: form.csrftoken.value
         };
 
         try {
             const response = await fetch('/auth/register', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': form.csrftoken.value
+                },
+                body: JSON.stringify(formData),
+                credentials: 'include'
             });
 
             handleRegisterResponse(response);
@@ -33,19 +39,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const userData = await response.json();
             showToast(`Пользователь ${userData.username} успешно зарегистрирован`, 'success');
             setTimeout(() => window.location.href = '/login', 1500);
-        }
-        else if (response.status === 400) {
+        } else if (response.status === 400) {
             const error = await response.json();
             const message = error.detail === 'REGISTER_USER_ALREADY_EXISTS'
                 ? 'Пользователь с таким email уже существует'
                 : error.detail;
             showToast(message, 'danger');
-        }
-        else if (response.status === 422) {
+        } else if (response.status === 422) {
             const errors = await response.json();
             showToast('Ошибка валидации: ' + errors.detail.map(e => e.msg).join(', '), 'danger');
-        }
-        else {
+        } else {
             showToast(`Ошибка сервера: ${response.status}`, 'danger');
         }
     }

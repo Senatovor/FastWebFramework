@@ -1,20 +1,25 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const loginForm = document.getElementById('loginForm');
 
     loginForm.addEventListener('submit', handleLoginSubmit);
 
     async function handleLoginSubmit(e) {
         e.preventDefault();
+        const form = e.target;
 
         const formData = new URLSearchParams();
         formData.append('grant_type', 'password');
         formData.append('username', document.getElementById('username').value);
         formData.append('password', document.getElementById('password').value);
+        formData.append('csrftoken', form.csrftoken.value);
 
         try {
             const response = await fetch('/auth/jwt/login', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': form.csrftoken.value
+                },
                 body: formData,
                 credentials: 'include'
             });
@@ -29,19 +34,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (response.ok) {
             showToast('Вход выполнен успешно', 'success');
             setTimeout(() => window.location.href = '/', 1500);
-        }
-        else if (response.status === 400) {
+        } else if (response.status === 400) {
             const error = await response.json();
             const message = error.detail === 'LOGIN_BAD_CREDENTIALS'
                 ? 'Неверное имя пользователя или пароль'
                 : error.detail;
             showToast(message, 'danger');
-        }
-        else if (response.status === 422) {
+        } else if (response.status === 422) {
             const errors = await response.json();
             showToast('Ошибка валидации: ' + errors.detail.map(e => e.msg).join(', '), 'danger');
-        }
-        else {
+        } else {
             showToast(`Ошибка сервера: ${response.status}`, 'danger');
         }
     }

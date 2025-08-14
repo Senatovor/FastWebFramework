@@ -9,6 +9,7 @@
         <h2 class="card-title text-center mb-4">Вход в систему</h2>
 
         <form id="loginForm" novalidate>
+            <input type="hidden" name="csrftoken" value="{{ request.scope.csrftoken() }}">
             <div class="mb-3">
                 <label for="username" class="form-label">Почта пользователя</label>
                 <input type="email" class="form-control" id="username" name="username" required>

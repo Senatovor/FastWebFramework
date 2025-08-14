@@ -36,7 +36,7 @@ class AuthBackend:
         cookie_httponly=True,
         cookie_secure=True,
         cookie_samesite='lax',
-        cookie_max_age=3600
+        cookie_max_age=3600,
     )
 
     @classmethod

@@ -9,6 +9,7 @@
         <h2 class="card-title text-center mb-4">Регистрация</h2>
 
         <form id="registerForm" novalidate>
+            <input type="hidden" name="csrftoken" value="{{ request.scope.csrftoken() }}">
             <div class="mb-3">
                 <label for="username" class="form-label">Имя пользователя</label>
                 <input type="text" class="form-control" id="username" name="username" required maxlength="20">

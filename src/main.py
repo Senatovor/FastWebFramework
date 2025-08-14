@@ -6,6 +6,7 @@ from loguru import logger
 from pathlib import Path
 from contextlib import asynccontextmanager
 from sqladmin import Admin
+from asgi_csrf import asgi_csrf
 
 from src.admin.middleware import AdminAuthMiddleware
 from src.admin.models import UserAdmin
@@ -67,6 +68,7 @@ def create_app() -> FastAPI:
     - Регистрацию маршрутов аутентификации
     - Подключение административных маршрутов
     - Добавление middleware для аутентификации администраторов
+    - Добавление csrf защиты
     """
     app = FastAPI(
         title=config.TITLE,
@@ -99,7 +101,23 @@ def create_app() -> FastAPI:
     app.include_router(admin_router)
     app.include_router(auth_templates)
     app.add_middleware(AdminAuthMiddleware)
-    return app
+    csrf_protected_app = asgi_csrf(
+        app,
+        signing_secret="your-secret-key-here",
+        always_set_cookie=True,
+        cookie_name="csrftoken",
+        cookie_path="/",
+        cookie_domain=None,
+        cookie_secure=False,
+        cookie_samesite="Lax",
+        always_protect={
+            "/auth/jwt/login",
+            '/auth/jwt/logout',
+            '/auth/register',
+            '/auth/protected',
+        }
+    )
+    return csrf_protected_app
 
 
 if __name__ == '__main__':

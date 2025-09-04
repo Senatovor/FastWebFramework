@@ -8,9 +8,8 @@ from contextlib import asynccontextmanager
 from sqladmin import Admin
 from asgi_csrf import asgi_csrf
 
-from src.admin.middleware import AdminAuthMiddleware
+from src.admin.auth import AdminAuth
 from src.admin.models import UserAdmin
-from src.admin.router import admin_router
 from src.auth.backend import fastapi_users_modul, AuthBackend
 from src.auth.templates import auth_templates
 from src.redis_database.client import redis_manager
@@ -45,7 +44,8 @@ async def lifespan(app: FastAPI):
     await session_manager.init()
     app.state.db_manager = session_manager
 
-    admin = Admin(app, session_manager.engine)
+    auth_backend = AdminAuth(secret_key=config.auth_config.SECRET_KEY)
+    admin = Admin(app, session_manager.engine, authentication_backend=auth_backend)
     admin.add_view(UserAdmin)
 
     yield
@@ -80,6 +80,7 @@ def create_app() -> FastAPI:
         root_path=config.ROOT_PATH,
         lifespan=lifespan
     )
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -87,7 +88,9 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"]
     )
+
     app.mount('/static', StaticFiles(directory=Path(__file__).parent.parent / 'static'), name='static')
+
     app.include_router(
         fastapi_users_modul.get_auth_router(AuthBackend.get_auth_backend()),
         prefix="/auth/jwt",
@@ -98,9 +101,8 @@ def create_app() -> FastAPI:
         prefix="/auth",
         tags=["auth"],
     )
-    app.include_router(admin_router)
     app.include_router(auth_templates)
-    app.add_middleware(AdminAuthMiddleware)
+
     csrf_protected_app = asgi_csrf(
         app,
         signing_secret="your-secret-key-here",
@@ -117,6 +119,7 @@ def create_app() -> FastAPI:
             '/auth/protected',
         }
     )
+
     return csrf_protected_app
 
 

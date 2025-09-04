@@ -6,7 +6,7 @@ from .model import User
 from ..config import templates
 
 auth_templates = APIRouter(
-    tags=["auth"],
+    tags=["templates"],
 )
 
 
